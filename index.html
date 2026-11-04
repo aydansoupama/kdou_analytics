@@ -153,36 +153,36 @@
                                 d'affaire</strong> généré (montant total des ventes) annuel pour les catégories desserts
                             ou boissons.</p>
                         <pre
-                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">EXTRACT</span>(<span class="sql-keyword">YEAR</span> <span class="sql-keyword">FROM</span> o.<span class="sql-column">order_date</span>) <span class="sql-keyword">AS</span> <span class="sql-column">annee</span>, c.<span class="sql-column">category_name</span>, <span class="sql-function">SUM</span>(od.<span class="sql-column">unit_price</span> * od.<span class="sql-column">quantity</span>) <span class="sql-keyword">AS</span> <span class="sql-column">ca_annuel</span>
-<span class="sql-keyword">FROM</span> <span class="sql-table">orders</span> o
-<span class="sql-keyword">JOIN</span> <span class="sql-table">order_details</span> od <span class="sql-keyword">ON</span> o.<span class="sql-column">id</span> = od.<span class="sql-column">order_id</span>
-<span class="sql-keyword">JOIN</span> <span class="sql-table">products</span> p <span class="sql-keyword">ON</span> od.<span class="sql-column">product_id</span> = p.<span class="sql-column">id</span>
-<span class="sql-keyword">JOIN</span> <span class="sql-table">categories</span> c <span class="sql-keyword">ON</span> p.<span class="sql-column">category_id</span> = c.<span class="sql-column">id</span>
-<span class="sql-keyword">WHERE</span> c.<span class="sql-column">category_name</span> <span class="sql-keyword">IN</span> (<span class="sql-string">'Desserts'</span>, <span class="sql-string">'Beverages'</span>)
-<span class="sql-keyword">GROUP BY</span> <span class="sql-column">annee</span>, c.<span class="sql-column">category_name</span>
-<span class="sql-keyword">ORDER BY</span> <span class="sql-column">annee</span> <span class="sql-keyword">DESC</span>;</code></pre>
+                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">YEAR</span>(Commande.<span class="sql-column">DateCde</span>) <span class="sql-keyword">AS</span> <span class="sql-column">Annee</span>, <span class="sql-function">SUM</span>(DetailCommande.<span class="sql-column">Quantité</span> * Produit.<span class="sql-column">CoutAchat</span> * Categorie.<span class="sql-column">CoefMarge</span> * (<span class="sql-number">1</span> - DetailCommande.[<span class="sql-column">Remise (%)</span>])) <span class="sql-keyword">AS</span> <span class="sql-column">CA</span>
+<span class="sql-keyword">FROM</span> (((<span class="sql-table">DetailCommande</span> <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Commande</span> <span class="sql-keyword">ON</span> DetailCommande.[<span class="sql-column">N° commande</span>] = Commande.[<span class="sql-column">N° commande</span>])
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Produit</span> <span class="sql-keyword">ON</span> DetailCommande.[<span class="sql-column">Réf produit</span>] = Produit.<span class="sql-column">RefProd</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">CodeCateg</span> = Categorie.<span class="sql-column">CodeCateg</span>)
+<span class="sql-keyword">WHERE</span> Categorie.<span class="sql-column">NomCateg</span> <span class="sql-keyword">IN</span> (<span class="sql-string">"Desserts"</span>, <span class="sql-string">"Boissons"</span>)
+<span class="sql-keyword">GROUP BY</span> <span class="sql-function">YEAR</span>(Commande.<span class="sql-column">DateCde</span>)
+<span class="sql-keyword">ORDER BY</span> <span class="sql-function">YEAR</span>(Commande.<span class="sql-column">DateCde</span>);</code></pre>
 
                         <div class="sql-results">
                             <table class="sql-table-results">
                                 <thead>
                                     <tr>
-                                        <th>annee</th>
-                                        <th>category_name</th>
-                                        <th>ca_annuel</th>
+                                        <th>Annee</th>
+                                        <th>CA</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>2025</td>
-                                        <td>Beverages</td>
-                                        <td>95 420.00 €</td>
+                                        <td>2020</td>
+                                        <td>169 222 €</td>
                                     </tr>
                                     <tr>
-                                        <td>2025</td>
-                                        <td>Desserts</td>
-                                        <td>48 110.25 €</td>
+                                        <td>2021</td>
+                                        <td>1 405 309 €</td>
                                     </tr>
-                                </tbody>
+                                    <tr>
+                                        <td>2022</td>
+                                        <td>1 390 €</td>
+                                    </tr>
+</tbody>
                             </table>
                         </div>
                     </div>
@@ -636,6 +636,76 @@
                                             <td>127,50 €</td>
                                             <td>61</td>
                                         </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </article>
+
+                <article class="member__requests" id="nael-requests">
+                    <div class="request-body">
+                        <section class="request-section">
+                            <h4>Énoncé de la requête :</h4>
+                            <p>Quels sont les produits de provenance des États-Unis avec un coût de moins de 25 € ? On
+                                veut connaître leurs noms et leurs prix (coût d'achat et prix de vente), ainsi que le nom
+                                du fournisseur et sa ville.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Intérêt de la requête :</h4>
+                            <p>Permet d'identifier des produits importés abordables auprès d'un pays partenaire
+                                spécifique. C'est un indicateur utile pour analyser les coûts d'achat, évaluer le
+                                catalogue international et calculer les marges appliquées.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Requête et explication de la conception :</h4>
+                            <p><strong>Jointures (FROM) :</strong> La provenance d'un produit n'est pas directement
+                                inscrite dans la table <code>Produit</code>. Il faut remonter jusqu'au pays du
+                                fournisseur (<code>Produit</code> → <code>Fournisseur</code> → <code>Pays</code>). De
+                                plus, le coefficient de marge dépend de la catégorie du produit (<code>Produit</code> →
+                                <code>Categorie</code>). Il faut donc joindre 4 tables au total.</p>
+                            <p><strong>Filtrage (WHERE) :</strong> On combine deux critères avec <code>AND</code> : le
+                                nom du pays en français doit être <code>"Etats-Unis"</code> et le coût d'achat doit être
+                                inférieur à 25 € (<code>Produit.CoutAchat &lt; 25</code>).</p>
+                            <p><strong>Calcul et Sélection (SELECT) :</strong> Le prix de vente est calculé
+                                dynamiquement en multipliant le coût d'achat par le coefficient de marge de la catégorie
+                                (<code>Produit.CoutAchat * Categorie.CoefMarge AS PrixVente</code>).</p>
+                            <p><strong>Tri (ORDER BY) :</strong> On trie les résultats par ordre alphabétique sur le
+                                nom du produit (<code>Produit.NomProd</code>).</p>
+                        </section>
+
+                        <pre class="sql-code"><code><span class="sql-keyword">SELECT</span> Produit.<span class="sql-column">NomProd</span>, Produit.<span class="sql-column">CoutAchat</span>, Produit.<span class="sql-column">CoutAchat</span> * Categorie.<span class="sql-column">CoefMarge</span> <span class="sql-keyword">AS</span> <span class="sql-column">PrixVente</span>,
+       Fournisseur.<span class="sql-column">Societe</span> <span class="sql-keyword">AS</span> <span class="sql-column">Fournisseur</span>, Fournisseur.<span class="sql-column">Ville</span>
+<span class="sql-keyword">FROM</span> ((<span class="sql-table">Produit</span> <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Fournisseur</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">NoFour</span> = Fournisseur.<span class="sql-column">NoFour</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Pays</span> <span class="sql-keyword">ON</span> Fournisseur.<span class="sql-column">NoPays</span> = Pays.<span class="sql-column">NoPays</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">CodeCateg</span> = Categorie.<span class="sql-column">CodeCateg</span>
+<span class="sql-keyword">WHERE</span> Pays.<span class="sql-column">PaysFR</span> = <span class="sql-string">"Etats-Unis"</span> <span class="sql-keyword">AND</span> Produit.<span class="sql-column">CoutAchat</span> &lt; <span class="sql-number">25</span>
+<span class="sql-keyword">ORDER BY</span> Produit.<span class="sql-column">NomProd</span>;</code></pre>
+
+                        <section class="request-section">
+                            <h4>Résultat de la requête :</h4>
+                            <div class="sql-results">
+                                <table class="sql-table-results">
+                                    <thead>
+                                        <tr>
+                                            <th>NomProd</th>
+                                            <th>CoutAchat</th>
+                                            <th>PrixVente</th>
+                                            <th>Fournisseur</th>
+                                            <th>Ville</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Boston Crab Meat</td><td>15,33</td><td>29,13</td><td>Atlantic Bay Fish Co.</td><td>Boston</td></tr>
+                                        <tr><td>Grandma's Boysenberry Spread</td><td>20,83</td><td>41,67</td><td>Miss Ruby's Kitchen</td><td>Ann Arbor</td></tr>
+                                        <tr><td>Jack's New England Clam Chowder</td><td>8,04</td><td>15,28</td><td>Atlantic Bay Fish Co.</td><td>Boston</td></tr>
+                                        <tr><td>Laughing Lumberjack Lager</td><td>11,67</td><td>29,17</td><td>Grizzly Hopworks Co.</td><td>Bend</td></tr>
+                                        <tr><td>Louisiana Fiery Hot Pepper Sauce</td><td>17,54</td><td>35,08</td><td>Bayou pice Traders</td><td>New Orleans</td></tr>
+                                        <tr><td>Louisiana Hot Spiced Okra</td><td>14,17</td><td>28,33</td><td>Bayou pice Traders</td><td>New Orleans</td></tr>
+                                        <tr><td>Sasquatch Ale</td><td>11,67</td><td>29,17</td><td>Grizzly Hopworks Co.</td><td>Bend</td></tr>
+                                        <tr><td>Steeleye Stout</td><td>15,00</td><td>37,50</td><td>Grizzly Hopworks Co.</td><td>Bend</td></tr>
                                     </tbody>
                                 </table>
                             </div>
