@@ -55,6 +55,10 @@ body {
     background-color: var(--background);
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 .header {
     position: sticky;
     top: 0;
@@ -155,6 +159,8 @@ main {
     color: var(--foreground);
     border: 1px solid var(--border);
     border-radius: .5rem;
+    /* Les liens du menu (#team, #group-requests) ne doivent pas cacher le titre sous le header sticky */
+    scroll-margin-top: 6rem;
 }
 
 .section__title {
