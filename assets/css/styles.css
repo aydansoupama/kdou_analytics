@@ -464,7 +464,6 @@ input[type="radio"]#nael:checked~.member__requests#nael-requests {
     color: var(--foreground);
 }
 
-/* Modificateurs pour forcer l'affichage vertical (requête AU-DESSUS du résultat) */
 .accordion__content {
     display: flex !important;
     flex-direction: column !important;
