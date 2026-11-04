@@ -11,15 +11,15 @@
 <body>
     <header class="header">
         <div class="header__container">
-            <h3 class="header__title-container"><a href="/" class="header__title">Kdou Analytics</a></h3>
+            <h3 class="header__title-container"><a href="#" class="header__title">Kdou Analytics</a></h3>
 
             <nav class="header__navigation">
 
                 <ul class="header__navigation-list">
-                    <li class="header__navigation-item"><a href="/" class="header__navigation-link">Accueil</a></li>
-                    <li class="header__navigation-item"><a href="/requests" class="header__navigation-link">Requêtes</a>
+                    <li class="header__navigation-item"><a href="#" class="header__navigation-link">Accueil</a></li>
+                    <li class="header__navigation-item"><a href="#group-requests" class="header__navigation-link">Requêtes</a>
                     </li>
-                    <li class="header__navigation-item"><a href="/team" class="header__navigation-link">Team</a></li>
+                    <li class="header__navigation-item"><a href="#team" class="header__navigation-link">Team</a></li>
                 </ul>
             </nav>
 
@@ -105,22 +105,37 @@
                             <strong>CA total</strong> généré à ce jour avec les fournisseurs de l'UE.
                         </p>
                         <pre
-                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">SUM</span>(od.<span class="sql-column">unit_price</span> * od.<span class="sql-column">quantity</span> * (<span class="sql-number">1</span> - od.<span class="sql-column">discount</span>)) <span class="sql-keyword">AS</span> <span class="sql-column">ca_total_ue</span>
-<span class="sql-keyword">FROM</span> <span class="sql-table">order_details</span> od
-<span class="sql-keyword">JOIN</span> <span class="sql-table">products</span> p <span class="sql-keyword">ON</span> od.<span class="sql-column">product_id</span> = p.<span class="sql-column">id</span>
-<span class="sql-keyword">JOIN</span> <span class="sql-table">suppliers</span> s <span class="sql-keyword">ON</span> p.<span class="sql-column">supplier_id</span> = s.<span class="sql-column">id</span>
-<span class="sql-keyword">WHERE</span> s.<span class="sql-column">country</span> <span class="sql-keyword">IN</span> (<span class="sql-string">'France'</span>, <span class="sql-string">'Germany'</span>, <span class="sql-string">'Italy'</span>, <span class="sql-string">'Spain'</span>);</code></pre>
+                            class="sql-code"><code><span class="sql-keyword">SELECT</span>
+    <span class="sql-function">SUM</span>(
+        (PR.<span class="sql-column">CoutAchat</span> * CA.<span class="sql-column">CoefMarge</span> * DC.<span class="sql-column">Quantité</span>) * (<span class="sql-number">1</span> - DC.[<span class="sql-column">Remise (%)</span>])
+    ) <span class="sql-keyword">AS</span> <span class="sql-column">CATotalUE</span>
+<span class="sql-keyword">FROM</span>
+    (
+        <span class="sql-table">Produit</span> <span class="sql-keyword">AS</span> PR
+        <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">DetailCommande</span> <span class="sql-keyword">AS</span> DC <span class="sql-keyword">ON</span> PR.<span class="sql-column">RefProd</span> = DC.[<span class="sql-column">Réf produit</span>]
+    )
+    <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">AS</span> CA <span class="sql-keyword">ON</span> PR.<span class="sql-column">CodeCateg</span> = CA.<span class="sql-column">CodeCateg</span>
+<span class="sql-keyword">WHERE</span>
+    PR.<span class="sql-column">NoFour</span> <span class="sql-keyword">IN</span> (
+        <span class="sql-keyword">SELECT</span>
+            F.<span class="sql-column">NoFour</span>
+        <span class="sql-keyword">FROM</span>
+            <span class="sql-table">Fournisseur</span> <span class="sql-keyword">AS</span> F
+            <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Pays</span> <span class="sql-keyword">AS</span> PA <span class="sql-keyword">ON</span> F.<span class="sql-column">NoPays</span> = PA.<span class="sql-column">NoPays</span>
+        <span class="sql-keyword">WHERE</span>
+            PA.<span class="sql-column">UE</span> <span class="sql-keyword">LIKE</span> <span class="sql-string">"*membre*"</span>
+    );</code></pre>
 
                         <div class="sql-results">
                             <table class="sql-table-results">
                                 <thead>
                                     <tr>
-                                        <th>ca_total_ue</th>
+                                        <th>CATotalUE</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>412 850.50 €</td>
+                                        <td>2754529,74457289</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -138,36 +153,36 @@
                                 d'affaire</strong> généré (montant total des ventes) annuel pour les catégories desserts
                             ou boissons.</p>
                         <pre
-                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">EXTRACT</span>(<span class="sql-keyword">YEAR</span> <span class="sql-keyword">FROM</span> o.<span class="sql-column">order_date</span>) <span class="sql-keyword">AS</span> <span class="sql-column">annee</span>, c.<span class="sql-column">category_name</span>, <span class="sql-function">SUM</span>(od.<span class="sql-column">unit_price</span> * od.<span class="sql-column">quantity</span>) <span class="sql-keyword">AS</span> <span class="sql-column">ca_annuel</span>
-<span class="sql-keyword">FROM</span> <span class="sql-table">orders</span> o
-<span class="sql-keyword">JOIN</span> <span class="sql-table">order_details</span> od <span class="sql-keyword">ON</span> o.<span class="sql-column">id</span> = od.<span class="sql-column">order_id</span>
-<span class="sql-keyword">JOIN</span> <span class="sql-table">products</span> p <span class="sql-keyword">ON</span> od.<span class="sql-column">product_id</span> = p.<span class="sql-column">id</span>
-<span class="sql-keyword">JOIN</span> <span class="sql-table">categories</span> c <span class="sql-keyword">ON</span> p.<span class="sql-column">category_id</span> = c.<span class="sql-column">id</span>
-<span class="sql-keyword">WHERE</span> c.<span class="sql-column">category_name</span> <span class="sql-keyword">IN</span> (<span class="sql-string">'Desserts'</span>, <span class="sql-string">'Beverages'</span>)
-<span class="sql-keyword">GROUP BY</span> <span class="sql-column">annee</span>, c.<span class="sql-column">category_name</span>
-<span class="sql-keyword">ORDER BY</span> <span class="sql-column">annee</span> <span class="sql-keyword">DESC</span>;</code></pre>
+                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">YEAR</span>(Commande.<span class="sql-column">DateCde</span>) <span class="sql-keyword">AS</span> <span class="sql-column">Annee</span>, <span class="sql-function">SUM</span>(DetailCommande.<span class="sql-column">Quantité</span> * Produit.<span class="sql-column">CoutAchat</span> * Categorie.<span class="sql-column">CoefMarge</span> * (<span class="sql-number">1</span> - DetailCommande.[<span class="sql-column">Remise (%)</span>])) <span class="sql-keyword">AS</span> <span class="sql-column">CA</span>
+<span class="sql-keyword">FROM</span> (((<span class="sql-table">DetailCommande</span> <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Commande</span> <span class="sql-keyword">ON</span> DetailCommande.[<span class="sql-column">N° commande</span>] = Commande.[<span class="sql-column">N° commande</span>])
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Produit</span> <span class="sql-keyword">ON</span> DetailCommande.[<span class="sql-column">Réf produit</span>] = Produit.<span class="sql-column">RefProd</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">CodeCateg</span> = Categorie.<span class="sql-column">CodeCateg</span>)
+<span class="sql-keyword">WHERE</span> Categorie.<span class="sql-column">NomCateg</span> <span class="sql-keyword">IN</span> (<span class="sql-string">"Desserts"</span>, <span class="sql-string">"Boissons"</span>)
+<span class="sql-keyword">GROUP BY</span> <span class="sql-function">YEAR</span>(Commande.<span class="sql-column">DateCde</span>)
+<span class="sql-keyword">ORDER BY</span> <span class="sql-function">YEAR</span>(Commande.<span class="sql-column">DateCde</span>);</code></pre>
 
                         <div class="sql-results">
                             <table class="sql-table-results">
                                 <thead>
                                     <tr>
-                                        <th>annee</th>
-                                        <th>category_name</th>
-                                        <th>ca_annuel</th>
+                                        <th>Annee</th>
+                                        <th>CA</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>2025</td>
-                                        <td>Beverages</td>
-                                        <td>95 420.00 €</td>
+                                        <td>2020</td>
+                                        <td>169 222 €</td>
                                     </tr>
                                     <tr>
-                                        <td>2025</td>
-                                        <td>Desserts</td>
-                                        <td>48 110.25 €</td>
+                                        <td>2021</td>
+                                        <td>1 405 309 €</td>
                                     </tr>
-                                </tbody>
+                                    <tr>
+                                        <td>2022</td>
+                                        <td>1 390 €</td>
+                                    </tr>
+</tbody>
                             </table>
                         </div>
                     </div>
@@ -182,22 +197,22 @@
                         <p>Dans une réflexion en lien avec l'offre commerciale : Calcul de l'indicateur <strong>nombre
                                 de produits</strong> carnés non commandés actuellement ?</p>
                         <pre
-                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">COUNT</span>(p.<span class="sql-column">id</span>) <span class="sql-keyword">AS</span> <span class="sql-column">produits_carnes_non_commandes</span>
-<span class="sql-keyword">FROM</span> <span class="sql-table">products</span> p
-<span class="sql-keyword">JOIN</span> <span class="sql-table">categories</span> c <span class="sql-keyword">ON</span> p.<span class="sql-column">category_id</span> = c.<span class="sql-column">id</span>
-<span class="sql-keyword">WHERE</span> c.<span class="sql-column">category_name</span> = <span class="sql-string">'Meat/Poultry'</span>
-<span class="sql-keyword">AND</span> p.<span class="sql-column">id</span> <span class="sql-keyword">NOT IN</span> (<span class="sql-keyword">SELECT DISTINCT</span> <span class="sql-column">product_id</span> <span class="sql-keyword">FROM</span> <span class="sql-table">order_details</span>);</code></pre>
+                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">Count</span>(*) <span class="sql-keyword">AS</span> <span class="sql-column">Nb_produits_carnes_non_commandes</span>
+<span class="sql-keyword">FROM</span> <span class="sql-table">Produit</span> <span class="sql-keyword">AS</span> P
+<span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">AS</span> C <span class="sql-keyword">ON</span> P.<span class="sql-column">CodeCateg</span> = C.<span class="sql-column">CodeCateg</span>
+<span class="sql-keyword">WHERE</span> C.<span class="sql-column">NomCateg</span> = <span class="sql-string">"Viandes"</span>
+  <span class="sql-keyword">AND</span> P.<span class="sql-column">RefProd</span> <span class="sql-keyword">NOT IN</span> (<span class="sql-keyword">SELECT</span> [<span class="sql-column">Réf produit</span>] <span class="sql-keyword">FROM</span> <span class="sql-table">DetailCommande</span>);</code></pre>
 
                         <div class="sql-results">
                             <table class="sql-table-results">
                                 <thead>
                                     <tr>
-                                        <th>produits_carnes_non_commandes</th>
+                                        <th>Nb_produits_carnes_non_commandes</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>3</td>
+                                        <td>2</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -425,6 +440,272 @@
                                             <td>Pâté chinois</td>
                                             <td>162350</td>
                                         </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </article>
+
+                <article class="member__requests" id="djoe-requests">
+                    <div class="request-body">
+                        <section class="request-section">
+                            <h4>Énoncé de la requête :</h4>
+                            <p>Calculer, pour chaque catégorie de produits, le chiffre d'affaires réalisé avec les
+                                fournisseurs de l'Union européenne et avec ceux situés hors de l'Union européenne,
+                                afin de repérer la part des produits qui viennent de loin.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Intérêt de la requête :</h4>
+                            <p>Les produits hors UE parcourent plus de kilomètres, donc plus de transport et de CO2.
+                                Cet indicateur montre les catégories où Kdou dépend le plus de l'import lointain : ce
+                                sont les premières où chercher des fournisseurs européens ou français pour renforcer
+                                son image éco-responsable, voire réduire ses coûts de transport.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Requête et explication de la conception :</h4>
+                            <p>Je suis parti des lignes de commande (<code>DetailCommande</code>) puis j'ai remonté
+                                au produit, à sa catégorie (pour le coefficient de marge), à son fournisseur et enfin à
+                                son pays, où le champ <code>UE</code> vaut « Membre » ou « Hors ». J'ai utilisé des
+                                jointures internes imbriquées avec des parenthèses comme l'exige Access.</p>
+                            <p>Le CA de chaque ligne est calculé avec le prix de vente (coût d'achat × coefficient de
+                                marge) multiplié par la quantité et par (1 − remise). Je fais ensuite la somme par
+                                catégorie et par origine avec <code>GROUP BY</code>, arrondie à deux décimales
+                                avec <code>ROUND</code>.</p>
+                        </section>
+
+                        <pre class="sql-code"><code><span class="sql-keyword">SELECT</span> C.<span class="sql-column">NomCateg</span> <span class="sql-keyword">AS</span> <span class="sql-column">Categorie</span>, <span class="sql-table">Pays</span>.<span class="sql-column">UE</span> <span class="sql-keyword">AS</span> <span class="sql-column">Origine</span>,
+       <span class="sql-function">Round</span>(<span class="sql-function">Sum</span>(D.[<span class="sql-column">Quantité</span>] * P.<span class="sql-column">CoutAchat</span> * C.<span class="sql-column">CoefMarge</span> * (<span class="sql-number">1</span> - D.[<span class="sql-column">Remise (%)</span>])), <span class="sql-number">2</span>) <span class="sql-keyword">AS</span> <span class="sql-column">CA</span>
+<span class="sql-keyword">FROM</span> ((((<span class="sql-table">DetailCommande</span> <span class="sql-keyword">AS</span> D <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Produit</span> <span class="sql-keyword">AS</span> P <span class="sql-keyword">ON</span> D.[<span class="sql-column">Réf produit</span>] = P.<span class="sql-column">RefProd</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">AS</span> C <span class="sql-keyword">ON</span> P.<span class="sql-column">CodeCateg</span> = C.<span class="sql-column">CodeCateg</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Fournisseur</span> <span class="sql-keyword">AS</span> F <span class="sql-keyword">ON</span> P.<span class="sql-column">NoFour</span> = F.<span class="sql-column">NoFour</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Pays</span> <span class="sql-keyword">ON</span> F.<span class="sql-column">NoPays</span> = <span class="sql-table">Pays</span>.<span class="sql-column">NoPays</span>)
+<span class="sql-keyword">GROUP BY</span> C.<span class="sql-column">NomCateg</span>, <span class="sql-table">Pays</span>.<span class="sql-column">UE</span>
+<span class="sql-keyword">ORDER BY</span> C.<span class="sql-column">NomCateg</span>, <span class="sql-table">Pays</span>.<span class="sql-column">UE</span>;</code></pre>
+
+                        <section class="request-section">
+                            <h4>Résultat de la requête :</h4>
+                            <div class="sql-results">
+                                <table class="sql-table-results">
+                                    <thead>
+                                        <tr>
+                                            <th>Categorie</th>
+                                            <th>Origine</th>
+                                            <th>CA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Boissons</td><td>Hors</td><td>347 927,87</td></tr>
+                                        <tr><td>Boissons</td><td>Membre</td><td>681 107,16</td></tr>
+                                        <tr><td>Condiments</td><td>Hors</td><td>378 279,05</td></tr>
+                                        <tr><td>Condiments</td><td>Membre</td><td>190 913,87</td></tr>
+                                        <tr><td>Desserts</td><td>Hors</td><td>232 656,52</td></tr>
+                                        <tr><td>Desserts</td><td>Membre</td><td>314 228,66</td></tr>
+                                        <tr><td>Poissons et fruits de mer</td><td>Hors</td><td>165 379,48</td></tr>
+                                        <tr><td>Poissons et fruits de mer</td><td>Membre</td><td>141 708,95</td></tr>
+                                        <tr><td>Produits laitiers</td><td>Hors</td><td>141 081,25</td></tr>
+                                        <tr><td>Produits laitiers</td><td>Membre</td><td>917 435,91</td></tr>
+                                        <tr><td>Produits secs</td><td>Hors</td><td>398 908,00</td></tr>
+                                        <tr><td>Produits secs</td><td>Membre</td><td>43 006,88</td></tr>
+                                        <tr><td>Pâtes et céréales</td><td>Hors</td><td>65 520,59</td></tr>
+                                        <tr><td>Pâtes et céréales</td><td>Membre</td><td>267 587,26</td></tr>
+                                        <tr><td>Viandes</td><td>Hors</td><td>479 107,32</td></tr>
+                                        <tr><td>Viandes</td><td>Membre</td><td>198 541,04</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p>Au total, 44,5 % du CA vient de produits hors UE. Les catégories les plus dépendantes
+                                sont les Produits secs (90 % hors UE), les Viandes (71 %) et les Condiments (66 %).</p>
+                        </section>
+                    </div>
+                </article>
+
+                <article class="member__requests" id="emmanuel-requests">
+                    <div class="request-body">
+                        <section class="request-section">
+                            <h4>Énoncé de la requête :</h4>
+                            <p>Lister les produits dont le stock est supérieur ou égal à la moyenne des stocks et qui
+                                n'ont fait l'objet d'aucune commande sur la dernière année complète ni sur l'année en
+                                cours. Ces « stocks dormants » sont des produits stockés en quantité importante qui ne
+                                se vendent plus et qui risquent d'être perdus.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Intérêt de la requête :</h4>
+                            <p>Cette requête aide Kdou à limiter le gaspillage et les pertes financières. En repérant
+                                les produits stockés en grande quantité mais qui ne sont plus commandés, l'entreprise
+                                peut prévoir des opérations promotionnelles pour les écouler avant qu'ils ne soient
+                                perdus, et ajuster ses prochaines commandes auprès des fournisseurs. Réduire le
+                                gaspillage s'inscrit aussi dans la volonté de Kdou de renforcer son image d'entreprise
+                                éco-responsable.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Requête et explication de la conception :</h4>
+                            <p>Pour concevoir cet indicateur personnel, j'ai voulu repérer les produits dont le stock
+                                est élevé, c'est-à-dire supérieur ou égal à la moyenne des stocks, et qui n'ont été
+                                commandés ni sur la dernière année complète, ni sur l'année en cours.</p>
+                            <p>Toutes les informations à afficher se trouvent dans la table <code>Produit</code>. La
+                                moyenne des stocks est calculée par une première sous-requête avec la fonction
+                                <code>Avg</code> sur le champ <code>UnitStock</code>. Une seconde sous-requête
+                                (<code>NOT IN</code>) liste les produits commandés sur la période, en reliant
+                                <code>DetailCommande</code> à <code>Commande</code> pour récupérer la date de commande :
+                                les produits qui n'y figurent pas n'ont donc pas été commandés. Enfin, plutôt que de
+                                fixer les années à la main, je les déduis de la commande la plus récente avec
+                                <code>Max(Year(DateCde)) - 1</code> et <code>Max(Year(DateCde))</code>, ce qui permet à
+                                la requête de rester valable lorsque de nouvelles commandes sont ajoutées.</p>
+                        </section>
+
+                        <pre class="sql-code"><code><span class="sql-keyword">SELECT</span>
+    *
+<span class="sql-keyword">FROM</span>
+    <span class="sql-table">Produit</span> <span class="sql-keyword">AS</span> PR
+<span class="sql-keyword">WHERE</span>
+    PR.<span class="sql-column">UnitStock</span> &gt;= (
+        <span class="sql-keyword">SELECT</span>
+            <span class="sql-function">Avg</span>(<span class="sql-column">UnitStock</span>)
+        <span class="sql-keyword">FROM</span>
+            <span class="sql-table">Produit</span>
+    )
+    <span class="sql-keyword">AND</span> PR.<span class="sql-column">RefProd</span> <span class="sql-keyword">NOT IN</span> (
+        <span class="sql-keyword">SELECT</span>
+            DC.[<span class="sql-column">Réf produit</span>]
+        <span class="sql-keyword">FROM</span>
+            <span class="sql-table">DetailCommande</span> <span class="sql-keyword">AS</span> DC
+            <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Commande</span> <span class="sql-keyword">AS</span> CO <span class="sql-keyword">ON</span> DC.[<span class="sql-column">N° commande</span>] = CO.[<span class="sql-column">N° commande</span>]
+        <span class="sql-keyword">WHERE</span>
+            <span class="sql-function">Year</span>(CO.<span class="sql-column">DateCde</span>) <span class="sql-keyword">IN</span> (
+                <span class="sql-keyword">SELECT</span>
+                    <span class="sql-function">Max</span>(<span class="sql-function">Year</span>(<span class="sql-column">DateCde</span>)) - <span class="sql-number">1</span>
+                <span class="sql-keyword">FROM</span>
+                    <span class="sql-table">Commande</span>
+            )
+            <span class="sql-keyword">OR</span> <span class="sql-function">Year</span>(CO.<span class="sql-column">DateCde</span>) <span class="sql-keyword">IN</span> (
+                <span class="sql-keyword">SELECT</span>
+                    <span class="sql-function">Max</span>(<span class="sql-function">Year</span>(<span class="sql-column">DateCde</span>))
+                <span class="sql-keyword">FROM</span>
+                    <span class="sql-table">Commande</span>
+            )
+    );</code></pre>
+
+                        <section class="request-section">
+                            <h4>Résultat de la requête :</h4>
+                            <p>Avec les données actuelles, la commande la plus récente date de 2022 : la période
+                                étudiée couvre donc 2021 et 2022, et la moyenne des stocks est d'environ 30,34 unités.
+                            </p>
+                            <div class="sql-results">
+                                <table class="sql-table-results">
+                                    <thead>
+                                        <tr>
+                                            <th>Réf produit</th>
+                                            <th>N° fournisseur</th>
+                                            <th>Code catégorie</th>
+                                            <th>Nom produit</th>
+                                            <th>Quantité par unité</th>
+                                            <th>CoutAchat</th>
+                                            <th>Unités en stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>84</td>
+                                            <td>1</td>
+                                            <td>1</td>
+                                            <td>Limonadystel</td>
+                                            <td>10</td>
+                                            <td>36,67 €</td>
+                                            <td>50</td>
+                                        </tr>
+                                        <tr>
+                                            <td>125</td>
+                                            <td>1</td>
+                                            <td>1</td>
+                                            <td>LimoCoca</td>
+                                            <td>12</td>
+                                            <td>40,15 €</td>
+                                            <td>46</td>
+                                        </tr>
+                                        <tr>
+                                            <td>130</td>
+                                            <td>9</td>
+                                            <td>5</td>
+                                            <td>knäckebrod Kala</td>
+                                            <td>10 cartons (250 g)</td>
+                                            <td>127,50 €</td>
+                                            <td>61</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </article>
+
+                <article class="member__requests" id="nael-requests">
+                    <div class="request-body">
+                        <section class="request-section">
+                            <h4>Énoncé de la requête :</h4>
+                            <p>Quels sont les produits de provenance des États-Unis avec un coût de moins de 25 € ? On
+                                veut connaître leurs noms et leurs prix (coût d'achat et prix de vente), ainsi que le nom
+                                du fournisseur et sa ville.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Intérêt de la requête :</h4>
+                            <p>Permet d'identifier des produits importés abordables auprès d'un pays partenaire
+                                spécifique. C'est un indicateur utile pour analyser les coûts d'achat, évaluer le
+                                catalogue international et calculer les marges appliquées.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Requête et explication de la conception :</h4>
+                            <p><strong>Jointures (FROM) :</strong> La provenance d'un produit n'est pas directement
+                                inscrite dans la table <code>Produit</code>. Il faut remonter jusqu'au pays du
+                                fournisseur (<code>Produit</code> → <code>Fournisseur</code> → <code>Pays</code>). De
+                                plus, le coefficient de marge dépend de la catégorie du produit (<code>Produit</code> →
+                                <code>Categorie</code>). Il faut donc joindre 4 tables au total.</p>
+                            <p><strong>Filtrage (WHERE) :</strong> On combine deux critères avec <code>AND</code> : le
+                                nom du pays en français doit être <code>"Etats-Unis"</code> et le coût d'achat doit être
+                                inférieur à 25 € (<code>Produit.CoutAchat &lt; 25</code>).</p>
+                            <p><strong>Calcul et Sélection (SELECT) :</strong> Le prix de vente est calculé
+                                dynamiquement en multipliant le coût d'achat par le coefficient de marge de la catégorie
+                                (<code>Produit.CoutAchat * Categorie.CoefMarge AS PrixVente</code>).</p>
+                            <p><strong>Tri (ORDER BY) :</strong> On trie les résultats par ordre alphabétique sur le
+                                nom du produit (<code>Produit.NomProd</code>).</p>
+                        </section>
+
+                        <pre class="sql-code"><code><span class="sql-keyword">SELECT</span> Produit.<span class="sql-column">NomProd</span>, Produit.<span class="sql-column">CoutAchat</span>, Produit.<span class="sql-column">CoutAchat</span> * Categorie.<span class="sql-column">CoefMarge</span> <span class="sql-keyword">AS</span> <span class="sql-column">PrixVente</span>,
+       Fournisseur.<span class="sql-column">Societe</span> <span class="sql-keyword">AS</span> <span class="sql-column">Fournisseur</span>, Fournisseur.<span class="sql-column">Ville</span>
+<span class="sql-keyword">FROM</span> ((<span class="sql-table">Produit</span> <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Fournisseur</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">NoFour</span> = Fournisseur.<span class="sql-column">NoFour</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Pays</span> <span class="sql-keyword">ON</span> Fournisseur.<span class="sql-column">NoPays</span> = Pays.<span class="sql-column">NoPays</span>)
+      <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">CodeCateg</span> = Categorie.<span class="sql-column">CodeCateg</span>
+<span class="sql-keyword">WHERE</span> Pays.<span class="sql-column">PaysFR</span> = <span class="sql-string">"Etats-Unis"</span> <span class="sql-keyword">AND</span> Produit.<span class="sql-column">CoutAchat</span> &lt; <span class="sql-number">25</span>
+<span class="sql-keyword">ORDER BY</span> Produit.<span class="sql-column">NomProd</span>;</code></pre>
+
+                        <section class="request-section">
+                            <h4>Résultat de la requête :</h4>
+                            <div class="sql-results">
+                                <table class="sql-table-results">
+                                    <thead>
+                                        <tr>
+                                            <th>NomProd</th>
+                                            <th>CoutAchat</th>
+                                            <th>PrixVente</th>
+                                            <th>Fournisseur</th>
+                                            <th>Ville</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Boston Crab Meat</td><td>15,33</td><td>29,13</td><td>Atlantic Bay Fish Co.</td><td>Boston</td></tr>
+                                        <tr><td>Grandma's Boysenberry Spread</td><td>20,83</td><td>41,67</td><td>Miss Ruby's Kitchen</td><td>Ann Arbor</td></tr>
+                                        <tr><td>Jack's New England Clam Chowder</td><td>8,04</td><td>15,28</td><td>Atlantic Bay Fish Co.</td><td>Boston</td></tr>
+                                        <tr><td>Laughing Lumberjack Lager</td><td>11,67</td><td>29,17</td><td>Grizzly Hopworks Co.</td><td>Bend</td></tr>
+                                        <tr><td>Louisiana Fiery Hot Pepper Sauce</td><td>17,54</td><td>35,08</td><td>Bayou pice Traders</td><td>New Orleans</td></tr>
+                                        <tr><td>Louisiana Hot Spiced Okra</td><td>14,17</td><td>28,33</td><td>Bayou pice Traders</td><td>New Orleans</td></tr>
+                                        <tr><td>Sasquatch Ale</td><td>11,67</td><td>29,17</td><td>Grizzly Hopworks Co.</td><td>Bend</td></tr>
+                                        <tr><td>Steeleye Stout</td><td>15,00</td><td>37,50</td><td>Grizzly Hopworks Co.</td><td>Bend</td></tr>
                                     </tbody>
                                 </table>
                             </div>
