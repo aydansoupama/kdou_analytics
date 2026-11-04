@@ -444,7 +444,7 @@ input[type="radio"]#nael:checked~.member__requests#nael-requests {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
-} 
+}  
 
 .request-section {
     display: flex;
