@@ -82,8 +82,8 @@
                 <li class="team__member">
                     <figure>
                         <img src="https://cdn.discordapp.com/avatars/692457135098822736/8ac2e9d4969554c56e5e0d5e89097ed1.png?size=256"
-                            alt="Avatar Naël">
-                        <figcaption>Naël</figcaption>
+                            alt="Avatar Nael">
+                        <figcaption>Nael</figcaption>
                     </figure>
                 </li>
             </ul>
@@ -102,7 +102,8 @@
                     </summary>
                     <div class="accordion__content">
                         <p>Dans une réflexion en lien avec l'origine de ses produits : On veut comme indicateur le
-                            <strong>CA total</strong> généré à ce jour avec les fournisseurs de l'UE.</p>
+                            <strong>CA total</strong> généré à ce jour avec les fournisseurs de l'UE.
+                        </p>
                         <pre
                             class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">SUM</span>(od.<span class="sql-column">unit_price</span> * od.<span class="sql-column">quantity</span> * (<span class="sql-number">1</span> - od.<span class="sql-column">discount</span>)) <span class="sql-keyword">AS</span> <span class="sql-column">ca_total_ue</span>
 <span class="sql-keyword">FROM</span> <span class="sql-table">order_details</span> od
@@ -130,7 +131,7 @@
                 <details class="accordion__item">
                     <summary class="accordion__header">
                         <span class="accordion__title">3) Santé : CA annuel (Desserts & Boissons)</span>
-                        <span class="accordion__author">Naël</span>
+                        <span class="accordion__author">Nael</span>
                     </summary>
                     <div class="accordion__content">
                         <p>Dans une réflexion en lien avec la santé : On veut comme indicateur le <strong>chiffre
@@ -175,7 +176,7 @@
                 <details class="accordion__item">
                     <summary class="accordion__header">
                         <span class="accordion__title">4) Offre commerciale : Produits carnés non commandés</span>
-                        <span class="accordion__author">Aydan</span>
+                        <span class="accordion__author">Djoë</span>
                     </summary>
                     <div class="accordion__content">
                         <p>Dans une réflexion en lien avec l'offre commerciale : Calcul de l'indicateur <strong>nombre
@@ -208,41 +209,57 @@
                     <summary class="accordion__header">
                         <span class="accordion__title">5) Partenariat client : Clients pilotes vs clients
                             partenaires</span>
-                        <span class="accordion__author">Djoë</span>
+                        <span class="accordion__author">Aydan</span>
                     </summary>
                     <div class="accordion__content">
                         <p>Dans une réflexion sur le partenariat client : A-t-on des clients pilotes d'un réseau
                             partenaire ayant autant de commandes que les clients partenaires ?</p>
+
                         <pre
-                            class="sql-code"><code><span class="sql-keyword">SELECT</span> c.<span class="sql-column">id</span>, c.<span class="sql-column">company_name</span>, c.<span class="sql-column">type</span>, <span class="sql-function">COUNT</span>(o.<span class="sql-column">id</span>) <span class="sql-keyword">AS</span> <span class="sql-column">nb_commandes</span>
-<span class="sql-keyword">FROM</span> <span class="sql-table">customers</span> c
-<span class="sql-keyword">JOIN</span> <span class="sql-table">orders</span> o <span class="sql-keyword">ON</span> c.<span class="sql-column">id</span> = o.<span class="sql-column">customer_id</span>
-<span class="sql-keyword">WHERE</span> c.<span class="sql-column">type</span> <span class="sql-keyword">IN</span> (<span class="sql-string">'Pilote'</span>, <span class="sql-string">'Partenaire'</span>)
-<span class="sql-keyword">GROUP BY</span> c.<span class="sql-column">id</span>, c.<span class="sql-column">company_name</span>, c.<span class="sql-column">type</span>
-<span class="sql-keyword">ORDER BY</span> <span class="sql-column">nb_commandes</span> <span class="sql-keyword">DESC</span>;</code></pre>
+                            class="sql-code"><code><span class="sql-keyword">SELECT</span>
+    <span class="sql-function">COUNT</span>(*)
+<span class="sql-keyword">FROM</span>
+    (
+        <span class="sql-keyword">SELECT</span>
+            Pilote.<span class="sql-column">CodeCli</span> <span class="sql-keyword">AS</span> <span class="sql-column">CodePilote</span>,
+            <span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> <span class="sql-column">nombre_commande_pilotes</span>
+        <span class="sql-keyword">FROM</span>
+            <span class="sql-table">Commande</span> <span class="sql-keyword">AS</span> C
+            <span class="sql-keyword">INNER JOIN</span> (
+                <span class="sql-keyword">SELECT DISTINCT</span>
+                    Pilote.<span class="sql-column">CodeCli</span>
+                <span class="sql-keyword">FROM</span>
+                    <span class="sql-table">Clientele</span> <span class="sql-keyword">AS</span> Pilote
+                    <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Clientele</span> <span class="sql-keyword">AS</span> Partenaire <span class="sql-keyword">ON</span> Pilote.<span class="sql-column">CodeCli</span> = Partenaire.<span class="sql-column">CodeCliPart</span>
+            ) <span class="sql-keyword">AS</span> Pilote <span class="sql-keyword">ON</span> C.<span class="sql-column">CodeCli</span> = Pilote.<span class="sql-column">CodeCli</span>
+        <span class="sql-keyword">GROUP BY</span>
+            Pilote.<span class="sql-column">CodeCli</span>
+    ) <span class="sql-keyword">AS</span> total_pilote
+    <span class="sql-keyword">INNER JOIN</span> (
+        <span class="sql-keyword">SELECT</span>
+            Partenaire.<span class="sql-column">CodeCliPart</span> <span class="sql-keyword">AS</span> <span class="sql-column">CodePilote</span>,
+            <span class="sql-function">COUNT</span>(*) <span class="sql-keyword">AS</span> <span class="sql-column">nombre_commande_partenaires</span>
+        <span class="sql-keyword">FROM</span>
+            <span class="sql-table">Clientele</span> <span class="sql-keyword">AS</span> Partenaire
+            <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Commande</span> <span class="sql-keyword">ON</span> Partenaire.<span class="sql-column">CodeCli</span> = Commande.<span class="sql-column">CodeCli</span>
+        <span class="sql-keyword">WHERE</span>
+            Partenaire.<span class="sql-column">CodeCliPart</span> <span class="sql-keyword">IS NOT NULL</span>
+        <span class="sql-keyword">GROUP BY</span>
+            Partenaire.<span class="sql-column">CodeCliPart</span>
+    ) <span class="sql-keyword">AS</span> total_partenaire <span class="sql-keyword">ON</span> total_pilote.<span class="sql-column">CodePilote</span> = total_partenaire.<span class="sql-column">CodePilote</span>
+<span class="sql-keyword">WHERE</span>
+    total_pilote.<span class="sql-column">nombre_commande_pilotes</span> = total_partenaire.<span class="sql-column">nombre_commande_partenaires</span>;</code></pre>
 
                         <div class="sql-results">
                             <table class="sql-table-results">
                                 <thead>
                                     <tr>
-                                        <th>id</th>
-                                        <th>company_name</th>
-                                        <th>type</th>
-                                        <th>nb_commandes</th>
+                                        <th>Expr1000</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>12</td>
-                                        <td>Alpha Resto</td>
-                                        <td>Pilote</td>
-                                        <td>31</td>
-                                    </tr>
-                                    <tr>
-                                        <td>05</td>
-                                        <td>Bio Food Co</td>
-                                        <td>Partenaire</td>
-                                        <td>31</td>
+                                        <td>0</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -266,37 +283,152 @@
                 <label for="emmanuel" class="member__label">Emmanuel</label>
 
                 <input type="radio" name="member" id="nael" value="nael">
-                <label for="nael" class="member__label">Naël</label>
+                <label for="nael" class="member__label">Nael</label>
 
                 <article class="member__requests" id="aydan-requests">
-                    <pre
-                        class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-column">id</span>, <span class="sql-column">username</span>, <span class="sql-column">email</span>, <span class="sql-column">status</span> <br /><span class="sql-keyword">FROM</span> <span class="sql-table">users</span> <br /><span class="sql-keyword">WHERE</span> <span class="sql-column">status</span> = <span class="sql-string">'active'</span>;</code></pre>
+                    <div class="request-body">
+                        <section class="request-section">
+                            <h4>Énoncé de la requête :</h4>
+                            <p>Extraire les 10 produits générant le plus grand chiffre d'affaires pour l'entreprise
+                                Kdou, tout en y associant les coordonnées et la ville de leurs fournisseurs respectifs.
+                                Cette vision croisée permet d'identifier nos articles phares et de préparer une future
+                                optimisation géographique des livraisons et des coûts de transport.</p>
+                        </section>
 
-                    <div class="sql-results">
-                        <table class="sql-table-results">
-                            <thead>
-                                <tr>
-                                    <th>id</th>
-                                    <th>username</th>
-                                    <th>email</th>
-                                    <th>status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>aydan_dev</td>
-                                    <td>aydan@example.com</td>
-                                    <td><span class="status-tag status-active">active</span></td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>sarah_m</td>
-                                    <td>sarah@example.com</td>
-                                    <td><span class="status-tag status-active">active</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <section class="request-section">
+                            <h4>Intérêt de la requête :</h4>
+                            <p>Cette requête offre un double avantage stratégique aux associés de Kdou : commercial et
+                                logistique. D'une part, elle met en lumière les produits les plus rentables du
+                                catalogue. D'autre part, en intégrant la ville du fournisseur, elle prépare le terrain
+                                pour une future table de distances, facilitant la négociation de contrats de
+                                partenariats locaux et réduisant les frais d'acheminement.</p>
+                        </section>
+
+                        <section class="request-section">
+                            <h4>Requête et explication de la conception :</h4>
+                            <p>Pour concevoir cet indicateur personnel, j'ai voulu lister le top 10 des produits les
+                                plus performants en termes de chiffre d'affaires, tout en récupérant les informations
+                                clés de leurs fournisseurs (numéro, société et ville).</p>
+                            <p>J'ai donc relié les tables <code>Produit</code>, <code>Categorie</code>,
+                                <code>DetailCommande</code> et <code>Fournisseur</code> en utilisant des jointures
+                                internes et en imbriquant les parenthèses exigées par Access. J'ai ensuite regroupé les
+                                données par fournisseur et par produit (<code>GROUP BY</code>), puis calculé le CA total
+                                en multipliant le coût d'achat, le coefficient de marge et la quantité commandée. Enfin,
+                                j'ai arrondi le résultat à deux décimales avec la fonction <code>ROUND</code>, appliqué
+                                une limite aux 10 premiers résultats (<code>TOP 10</code>), et trié le tout par ordre
+                                décroissant sur la colonne du chiffre d'affaires (<code>ORDER BY 5 DESC</code>).</p>
+                        </section>
+
+                        <pre class="sql-code"><code><span class="sql-keyword">SELECT TOP</span> 10
+    Fournisseur.<span class="sql-column">NoFour</span>,
+    Fournisseur.<span class="sql-column">Societe</span>,
+    Fournisseur.<span class="sql-column">Ville</span>,
+    Produit.<span class="sql-column">NomProd</span>,
+    <span class="sql-function">ROUND</span>(<span class="sql-function">SUM</span>(Produit.<span class="sql-column">CoutAchat</span> * Categorie.<span class="sql-column">CoefMarge</span> * DetailCommande.<span class="sql-column">Quantité</span>), 2) <span class="sql-keyword">AS</span> <span class="sql-column">CA_Produit</span>
+<span class="sql-keyword">FROM</span>
+    ((
+        <span class="sql-table">Produit</span>
+        <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">CodeCateg</span> = Categorie.<span class="sql-column">CodeCateg</span>
+    )
+    <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">DetailCommande</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">RefProd</span> = DetailCommande.[<span class="sql-column">Réf produit</span>])
+    <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Fournisseur</span> <span class="sql-keyword">ON</span> Produit.<span class="sql-column">NoFour</span> = Fournisseur.<span class="sql-column">NoFour</span>
+<span class="sql-keyword">GROUP BY</span>
+    Fournisseur.<span class="sql-column">NoFour</span>,
+    Fournisseur.<span class="sql-column">Societe</span>,
+    Fournisseur.<span class="sql-column">Ville</span>,
+    Produit.<span class="sql-column">NomProd</span>
+<span class="sql-keyword">ORDER BY</span>
+    5 <span class="sql-keyword">DESC</span>,
+    Produit.<span class="sql-column">NomProd</span>;</code></pre>
+
+                        <section class="request-section">
+                            <h4>Résultat de la requête :</h4>
+                            <div class="sql-results">
+                                <table class="sql-table-results">
+                                    <thead>
+                                        <tr>
+                                            <th>N°</th>
+                                            <th>Societe</th>
+                                            <th>Ville</th>
+                                            <th>Nom produit</th>
+                                            <th>CA_Produit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>18</td>
+                                            <td>Moines de Paris</td>
+                                            <td>Paris</td>
+                                            <td>Côte de Blaye</td>
+                                            <td>429285,35</td>
+                                        </tr>
+                                        <tr>
+                                            <td>24</td>
+                                            <td>Boomerang Goods Pty Ltd.</td>
+                                            <td>Sydney</td>
+                                            <td>Manjimup Dried Apples</td>
+                                            <td>359006,73</td>
+                                        </tr>
+                                        <tr>
+                                            <td>14</td>
+                                            <td>Dolci e Sapori s.r.l.</td>
+                                            <td>Ravenna</td>
+                                            <td>Gorgonzola Telino</td>
+                                            <td>244370,63</td>
+                                        </tr>
+                                        <tr>
+                                            <td>14</td>
+                                            <td>Dolci e Sapori s.r.l.</td>
+                                            <td>Ravenna</td>
+                                            <td>Mascarpone Fabioli</td>
+                                            <td>241296,01</td>
+                                        </tr>
+                                        <tr>
+                                            <td>33</td>
+                                            <td>EthnicFood France</td>
+                                            <td>Paris</td>
+                                            <td>Camembert Pierrot</td>
+                                            <td>239272,01</td>
+                                        </tr>
+                                        <tr>
+                                            <td>12</td>
+                                            <td>TanteGreta Handelsgruppe</td>
+                                            <td>Frankfurt</td>
+                                            <td>Rhönbräu Klosterbier</td>
+                                            <td>219905,08</td>
+                                        </tr>
+                                        <tr>
+                                            <td>12</td>
+                                            <td>TanteGreta Handelsgruppe</td>
+                                            <td>Frankfurt</td>
+                                            <td>Thüringer Rostbratwurst</td>
+                                            <td>216374,53</td>
+                                        </tr>
+                                        <tr>
+                                            <td>12</td>
+                                            <td>TanteGreta Handelsgruppe</td>
+                                            <td>Frankfurt</td>
+                                            <td>Original Frankfurter grüne Soße</td>
+                                            <td>187833,27</td>
+                                        </tr>
+                                        <tr>
+                                            <td>29</td>
+                                            <td>Délices de l'Érable</td>
+                                            <td>Ste-Hyacinthe</td>
+                                            <td>Maple Syrup</td>
+                                            <td>168300</td>
+                                        </tr>
+                                        <tr>
+                                            <td>25</td>
+                                            <td>Le Panier du Coin</td>
+                                            <td>Montréal</td>
+                                            <td>Pâté chinois</td>
+                                            <td>162350</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
                     </div>
                 </article>
 

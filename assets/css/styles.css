@@ -410,6 +410,72 @@ input[type="radio"]#nael:checked~.member__requests#nael-requests {
     background-color: var(--card);
 }
 
+/* Espacement interne pour les sections de requêtes individuelles */
+.request-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.request-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.request-section p {
+    line-height: 1.6;
+    color: var(--foreground);
+}
+
+.accordion__content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.25rem !important;
+}
+
+.accordion__content .sql-code,
+.accordion__content .sql-results {
+    width: 100%;
+}
+
+.request-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.request-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.request-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.request-section p {
+    line-height: 1.6;
+    color: var(--foreground);
+}
+
+/* Modificateurs pour forcer l'affichage vertical (requête AU-DESSUS du résultat) */
+.accordion__content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.25rem !important;
+}
+
+.accordion__content .sql-code,
+.accordion__content .sql-results {
+    width: 100%;
+}
+
 @media (max-width: 768px) {
     body>* {
         display: none;
@@ -420,48 +486,5 @@ input[type="radio"]#nael:checked~.member__requests#nael-requests {
         justify-content: center;
         align-items: center;
         height: 100vh;
-    }
-}
-
-@media (min-width: 769px) {
-    .accordion__content {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        align-items: start;
-        gap: 1.5rem;
-    }
-
-    .accordion__content>p {
-        grid-column: 1 / -1;
-    }
-
-    .accordion__content .sql-code,
-    .accordion__content .sql-results {
-        margin-top: 0;
-    }
-
-      .member__requests {
-        display: none;
-    }
-
-    .member__requests[style*="display: block"],
-    input[type="radio"]:checked~.member__requests {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        align-items: start;
-    }
-
-    .member__requests h4 {
-        grid-column: 1 / -1;
-    }
-
-    .sql-code {
-        margin-top: 0;
-        height: 100%;
-    }
-
-    .sql-results {
-        margin-top: 0;
     }
 }
