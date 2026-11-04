@@ -11,15 +11,15 @@
 <body>
     <header class="header">
         <div class="header__container">
-            <h3 class="header__title-container"><a href="#" class="header__title">Kdou Analytics</a></h3>
+            <h3 class="header__title-container"><a href="/" class="header__title">Kdou Analytics</a></h3>
 
             <nav class="header__navigation">
 
                 <ul class="header__navigation-list">
-                    <li class="header__navigation-item"><a href="#" class="header__navigation-link">Accueil</a></li>
-                    <li class="header__navigation-item"><a href="#group-requests" class="header__navigation-link">Requêtes</a>
+                    <li class="header__navigation-item"><a href="/" class="header__navigation-link">Accueil</a></li>
+                    <li class="header__navigation-item"><a href="/requests" class="header__navigation-link">Requêtes</a>
                     </li>
-                    <li class="header__navigation-item"><a href="#team" class="header__navigation-link">Team</a></li>
+                    <li class="header__navigation-item"><a href="/team" class="header__navigation-link">Team</a></li>
                 </ul>
             </nav>
 
@@ -105,37 +105,22 @@
                             <strong>CA total</strong> généré à ce jour avec les fournisseurs de l'UE.
                         </p>
                         <pre
-                            class="sql-code"><code><span class="sql-keyword">SELECT</span>
-    <span class="sql-function">SUM</span>(
-        (PR.<span class="sql-column">CoutAchat</span> * CA.<span class="sql-column">CoefMarge</span> * DC.<span class="sql-column">Quantité</span>) * (<span class="sql-number">1</span> - DC.[<span class="sql-column">Remise (%)</span>])
-    ) <span class="sql-keyword">AS</span> <span class="sql-column">CATotalUE</span>
-<span class="sql-keyword">FROM</span>
-    (
-        <span class="sql-table">Produit</span> <span class="sql-keyword">AS</span> PR
-        <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">DetailCommande</span> <span class="sql-keyword">AS</span> DC <span class="sql-keyword">ON</span> PR.<span class="sql-column">RefProd</span> = DC.[<span class="sql-column">Réf produit</span>]
-    )
-    <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">AS</span> CA <span class="sql-keyword">ON</span> PR.<span class="sql-column">CodeCateg</span> = CA.<span class="sql-column">CodeCateg</span>
-<span class="sql-keyword">WHERE</span>
-    PR.<span class="sql-column">NoFour</span> <span class="sql-keyword">IN</span> (
-        <span class="sql-keyword">SELECT</span>
-            F.<span class="sql-column">NoFour</span>
-        <span class="sql-keyword">FROM</span>
-            <span class="sql-table">Fournisseur</span> <span class="sql-keyword">AS</span> F
-            <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Pays</span> <span class="sql-keyword">AS</span> PA <span class="sql-keyword">ON</span> F.<span class="sql-column">NoPays</span> = PA.<span class="sql-column">NoPays</span>
-        <span class="sql-keyword">WHERE</span>
-            PA.<span class="sql-column">UE</span> <span class="sql-keyword">LIKE</span> <span class="sql-string">"*membre*"</span>
-    );</code></pre>
+                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">SUM</span>(od.<span class="sql-column">unit_price</span> * od.<span class="sql-column">quantity</span> * (<span class="sql-number">1</span> - od.<span class="sql-column">discount</span>)) <span class="sql-keyword">AS</span> <span class="sql-column">ca_total_ue</span>
+<span class="sql-keyword">FROM</span> <span class="sql-table">order_details</span> od
+<span class="sql-keyword">JOIN</span> <span class="sql-table">products</span> p <span class="sql-keyword">ON</span> od.<span class="sql-column">product_id</span> = p.<span class="sql-column">id</span>
+<span class="sql-keyword">JOIN</span> <span class="sql-table">suppliers</span> s <span class="sql-keyword">ON</span> p.<span class="sql-column">supplier_id</span> = s.<span class="sql-column">id</span>
+<span class="sql-keyword">WHERE</span> s.<span class="sql-column">country</span> <span class="sql-keyword">IN</span> (<span class="sql-string">'France'</span>, <span class="sql-string">'Germany'</span>, <span class="sql-string">'Italy'</span>, <span class="sql-string">'Spain'</span>);</code></pre>
 
                         <div class="sql-results">
                             <table class="sql-table-results">
                                 <thead>
                                     <tr>
-                                        <th>CATotalUE</th>
+                                        <th>ca_total_ue</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>2754529,74457289</td>
+                                        <td>412 850.50 €</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -197,22 +182,22 @@
                         <p>Dans une réflexion en lien avec l'offre commerciale : Calcul de l'indicateur <strong>nombre
                                 de produits</strong> carnés non commandés actuellement ?</p>
                         <pre
-                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">COUNT</span>(p.<span class="sql-column">id</span>) <span class="sql-keyword">AS</span> <span class="sql-column">produits_carnes_non_commandes</span>
-<span class="sql-keyword">FROM</span> <span class="sql-table">products</span> p
-<span class="sql-keyword">JOIN</span> <span class="sql-table">categories</span> c <span class="sql-keyword">ON</span> p.<span class="sql-column">category_id</span> = c.<span class="sql-column">id</span>
-<span class="sql-keyword">WHERE</span> c.<span class="sql-column">category_name</span> = <span class="sql-string">'Meat/Poultry'</span>
-<span class="sql-keyword">AND</span> p.<span class="sql-column">id</span> <span class="sql-keyword">NOT IN</span> (<span class="sql-keyword">SELECT DISTINCT</span> <span class="sql-column">product_id</span> <span class="sql-keyword">FROM</span> <span class="sql-table">order_details</span>);</code></pre>
+                            class="sql-code"><code><span class="sql-keyword">SELECT</span> <span class="sql-function">Count</span>(*) <span class="sql-keyword">AS</span> <span class="sql-column">Nb_produits_carnes_non_commandes</span>
+<span class="sql-keyword">FROM</span> <span class="sql-table">Produit</span> <span class="sql-keyword">AS</span> P
+<span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Categorie</span> <span class="sql-keyword">AS</span> C <span class="sql-keyword">ON</span> P.<span class="sql-column">CodeCateg</span> = C.<span class="sql-column">CodeCateg</span>
+<span class="sql-keyword">WHERE</span> C.<span class="sql-column">NomCateg</span> = <span class="sql-string">"Viandes"</span>
+  <span class="sql-keyword">AND</span> P.<span class="sql-column">RefProd</span> <span class="sql-keyword">NOT IN</span> (<span class="sql-keyword">SELECT</span> [<span class="sql-column">Réf produit</span>] <span class="sql-keyword">FROM</span> <span class="sql-table">DetailCommande</span>);</code></pre>
 
                         <div class="sql-results">
                             <table class="sql-table-results">
                                 <thead>
                                     <tr>
-                                        <th>produits_carnes_non_commandes</th>
+                                        <th>Nb_produits_carnes_non_commandes</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>3</td>
+                                        <td>2</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -516,140 +501,4 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <p>Au total, 44,5 % du CA vient de produits hors UE. Les catégories les plus dépendantes
-                                sont les Produits secs (90 % hors UE), les Viandes (71 %) et les Condiments (66 %).</p>
-                        </section>
-                    </div>
-                </article>
-
-                <article class="member__requests" id="emmanuel-requests">
-                    <div class="request-body">
-                        <section class="request-section">
-                            <h4>Énoncé de la requête :</h4>
-                            <p>Lister les produits dont le stock est supérieur ou égal à la moyenne des stocks et qui
-                                n'ont fait l'objet d'aucune commande sur la dernière année complète ni sur l'année en
-                                cours. Ces « stocks dormants » sont des produits stockés en quantité importante qui ne
-                                se vendent plus et qui risquent d'être perdus.</p>
-                        </section>
-
-                        <section class="request-section">
-                            <h4>Intérêt de la requête :</h4>
-                            <p>Cette requête aide Kdou à limiter le gaspillage et les pertes financières. En repérant
-                                les produits stockés en grande quantité mais qui ne sont plus commandés, l'entreprise
-                                peut prévoir des opérations promotionnelles pour les écouler avant qu'ils ne soient
-                                perdus, et ajuster ses prochaines commandes auprès des fournisseurs. Réduire le
-                                gaspillage s'inscrit aussi dans la volonté de Kdou de renforcer son image d'entreprise
-                                éco-responsable.</p>
-                        </section>
-
-                        <section class="request-section">
-                            <h4>Requête et explication de la conception :</h4>
-                            <p>Pour concevoir cet indicateur personnel, j'ai voulu repérer les produits dont le stock
-                                est élevé, c'est-à-dire supérieur ou égal à la moyenne des stocks, et qui n'ont été
-                                commandés ni sur la dernière année complète, ni sur l'année en cours.</p>
-                            <p>Toutes les informations à afficher se trouvent dans la table <code>Produit</code>. La
-                                moyenne des stocks est calculée par une première sous-requête avec la fonction
-                                <code>Avg</code> sur le champ <code>UnitStock</code>. Une seconde sous-requête
-                                (<code>NOT IN</code>) liste les produits commandés sur la période, en reliant
-                                <code>DetailCommande</code> à <code>Commande</code> pour récupérer la date de commande :
-                                les produits qui n'y figurent pas n'ont donc pas été commandés. Enfin, plutôt que de
-                                fixer les années à la main, je les déduis de la commande la plus récente avec
-                                <code>Max(Year(DateCde)) - 1</code> et <code>Max(Year(DateCde))</code>, ce qui permet à
-                                la requête de rester valable lorsque de nouvelles commandes sont ajoutées.</p>
-                        </section>
-
-                        <pre class="sql-code"><code><span class="sql-keyword">SELECT</span>
-    *
-<span class="sql-keyword">FROM</span>
-    <span class="sql-table">Produit</span> <span class="sql-keyword">AS</span> PR
-<span class="sql-keyword">WHERE</span>
-    PR.<span class="sql-column">UnitStock</span> &gt;= (
-        <span class="sql-keyword">SELECT</span>
-            <span class="sql-function">Avg</span>(<span class="sql-column">UnitStock</span>)
-        <span class="sql-keyword">FROM</span>
-            <span class="sql-table">Produit</span>
-    )
-    <span class="sql-keyword">AND</span> PR.<span class="sql-column">RefProd</span> <span class="sql-keyword">NOT IN</span> (
-        <span class="sql-keyword">SELECT</span>
-            DC.[<span class="sql-column">Réf produit</span>]
-        <span class="sql-keyword">FROM</span>
-            <span class="sql-table">DetailCommande</span> <span class="sql-keyword">AS</span> DC
-            <span class="sql-keyword">INNER JOIN</span> <span class="sql-table">Commande</span> <span class="sql-keyword">AS</span> CO <span class="sql-keyword">ON</span> DC.[<span class="sql-column">N° commande</span>] = CO.[<span class="sql-column">N° commande</span>]
-        <span class="sql-keyword">WHERE</span>
-            <span class="sql-function">Year</span>(CO.<span class="sql-column">DateCde</span>) <span class="sql-keyword">IN</span> (
-                <span class="sql-keyword">SELECT</span>
-                    <span class="sql-function">Max</span>(<span class="sql-function">Year</span>(<span class="sql-column">DateCde</span>)) - <span class="sql-number">1</span>
-                <span class="sql-keyword">FROM</span>
-                    <span class="sql-table">Commande</span>
-            )
-            <span class="sql-keyword">OR</span> <span class="sql-function">Year</span>(CO.<span class="sql-column">DateCde</span>) <span class="sql-keyword">IN</span> (
-                <span class="sql-keyword">SELECT</span>
-                    <span class="sql-function">Max</span>(<span class="sql-function">Year</span>(<span class="sql-column">DateCde</span>))
-                <span class="sql-keyword">FROM</span>
-                    <span class="sql-table">Commande</span>
-            )
-    );</code></pre>
-
-                        <section class="request-section">
-                            <h4>Résultat de la requête :</h4>
-                            <p>Avec les données actuelles, la commande la plus récente date de 2022 : la période
-                                étudiée couvre donc 2021 et 2022, et la moyenne des stocks est d'environ 30,34 unités.
-                            </p>
-                            <div class="sql-results">
-                                <table class="sql-table-results">
-                                    <thead>
-                                        <tr>
-                                            <th>Réf produit</th>
-                                            <th>N° fournisseur</th>
-                                            <th>Code catégorie</th>
-                                            <th>Nom produit</th>
-                                            <th>Quantité par unité</th>
-                                            <th>CoutAchat</th>
-                                            <th>Unités en stock</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>84</td>
-                                            <td>1</td>
-                                            <td>1</td>
-                                            <td>Limonadystel</td>
-                                            <td>10</td>
-                                            <td>36,67 €</td>
-                                            <td>50</td>
-                                        </tr>
-                                        <tr>
-                                            <td>125</td>
-                                            <td>1</td>
-                                            <td>1</td>
-                                            <td>LimoCoca</td>
-                                            <td>12</td>
-                                            <td>40,15 €</td>
-                                            <td>46</td>
-                                        </tr>
-                                        <tr>
-                                            <td>130</td>
-                                            <td>9</td>
-                                            <td>5</td>
-                                            <td>knäckebrod Kala</td>
-                                            <td>10 cartons (250 g)</td>
-                                            <td>127,50 €</td>
-                                            <td>61</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </section>
-                    </div>
-                </article>
-
-            </div>
-        </section>
-    </main>
-
-    <div class="no-responsive">
-        <p>Désolé la version mobile n&apos;est pas disponible pour le moment.</p>
-    </div>
-</body>
-
-</html>
+                            <p
